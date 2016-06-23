@@ -99,6 +99,111 @@ uint8_t SPI::transfer(uint8_t tx_)
 	return rx[0];
 }
 
+uint8_t SPI::read(uint8_t cmd)
+{
+	int ret;
+	uint8_t tx[2];
+	tx[0] = cmd;
+
+	uint8_t rx[ARRAY_SIZE(tx)];
+	struct spi_ioc_transfer tr;
+	tr.tx_buf = (unsigned long)tx;
+	tr.rx_buf = (unsigned long)rx;
+	tr.len = 2;
+	tr.delay_usecs = 0;
+//	tr.interbyte_usecs = 10;
+	tr.speed_hz = this->speed;
+	tr.bits_per_word = this->bits;
+
+	ret = ioctl(this->fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1)
+	{
+		perror("can't send spi message");
+		abort();
+	}
+
+	return rx[1];
+}
+
+uint8_t SPI::read(uint8_t cmd,uint8_t * trbuf, uint8_t len)
+{
+	int ret;
+	uint8_t tx[33];
+	tx[0] = cmd;
+
+	uint8_t rx[ARRAY_SIZE(tx)];
+	struct spi_ioc_transfer tr;
+	tr.tx_buf = (unsigned long)tx;
+	tr.rx_buf = (unsigned long)rx;
+	tr.len = len+1;
+	tr.delay_usecs = 0;
+//	tr.interbyte_usecs = 10;
+	tr.speed_hz = this->speed;
+	tr.bits_per_word = this->bits;
+
+	ret = ioctl(this->fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1)
+	{
+		perror("can't send spi message");
+		abort();
+	}
+	memcpy(trbuf,rx+1,len);
+	return rx[0];
+}
+
+uint8_t SPI::write(uint8_t reg, uint8_t value)
+{
+	int ret;
+	uint8_t tx[2];
+	tx[0] = reg;
+	tx[1] = value;
+
+	uint8_t rx[ARRAY_SIZE(tx)];
+	struct spi_ioc_transfer tr;
+	tr.tx_buf = (unsigned long)tx;
+	tr.rx_buf = (unsigned long)rx;
+	tr.len = 2;
+	tr.delay_usecs = 0;
+//	tr.interbyte_usecs = 10;
+	tr.speed_hz = this->speed;
+	tr.bits_per_word = this->bits;
+
+	ret = ioctl(this->fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1)
+	{
+		perror("can't send spi message");
+		abort();
+	}
+
+	return rx[0];
+}
+
+uint8_t SPI::write(uint8_t reg, const uint8_t * trbuf, uint8_t len)
+{
+	int ret;
+	uint8_t tx[33];
+	tx[0] = reg;
+	memcpy(tx+1,trbuf,len);
+
+	uint8_t rx[ARRAY_SIZE(tx)];
+	struct spi_ioc_transfer tr;
+	tr.tx_buf = (unsigned long)tx;
+	tr.rx_buf = (unsigned long)rx;
+	tr.len = len+1;
+	tr.delay_usecs = 0;
+//	tr.interbyte_usecs = 10;
+	tr.speed_hz = this->speed;
+	tr.bits_per_word = this->bits;
+
+	ret = ioctl(this->fd, SPI_IOC_MESSAGE(1), &tr);
+	if (ret < 1)
+	{
+		perror("can't send spi message");
+		abort();
+	}
+	return rx[0];
+}
+
 SPI::~SPI() {
 	close(this->fd);
 }

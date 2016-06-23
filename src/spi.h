@@ -9,6 +9,7 @@
 #define	SPI_H
 
 #include <string>
+#include <string.h>
 #include <stdint.h>
 #include <unistd.h>
 #include <stdio.h>
@@ -28,6 +29,10 @@ class SPI {
 public:
 	SPI(string spidev, int speed, int bits);
 	uint8_t transfer(uint8_t tx_);
+	uint8_t read(uint8_t cmd);
+	uint8_t read(uint8_t cmd, uint8_t * trbuf, uint8_t len);
+	uint8_t write(uint8_t reg, uint8_t value);
+	uint8_t write(uint8_t reg, const uint8_t * trbuf, uint8_t len);
 	virtual ~SPI();
 private:
 	string device;

@@ -36,11 +36,7 @@
 #include <unistd.h>
 #include <sched.h>
 
-#include "gpio_sun4i.h"
-
-
-unsigned int SUNXI_PIO_BASE = 0;
-static volatile long int *gpio_map = NULL;
+#include "gpio.h"
 
 GPIO::GPIO(void)
 {
@@ -53,8 +49,8 @@ GPIO::GPIO(void)
 
     fd = open("/dev/mem", O_RDWR);
     if(fd < 0) {
-	err = -1;
-        return;
+        err = -1;
+	return;
     }
 
     PageSize = sysconf(_SC_PAGESIZE);
@@ -75,8 +71,8 @@ GPIO::GPIO(void)
     close(fd);
 }
 
-int GPIO::sunxi_gpio_set_cfgpin(unsigned int pin, unsigned int val) {
-
+int GPIO::sunxi_gpio_set_cfgpin(unsigned int pin, unsigned int val)
+{
     unsigned int cfg;
     unsigned int bank = GPIO_BANK(pin);
     unsigned int index = GPIO_CFG_INDEX(pin);
@@ -99,8 +95,8 @@ int GPIO::sunxi_gpio_set_cfgpin(unsigned int pin, unsigned int val) {
     return 0;
 }
 
-int GPIO::sunxi_gpio_get_cfgpin(unsigned int pin) {
-
+int GPIO::sunxi_gpio_get_cfgpin(unsigned int pin)
+{
     unsigned int cfg;
     unsigned int bank = GPIO_BANK(pin);
     unsigned int index = GPIO_CFG_INDEX(pin);
@@ -114,8 +110,9 @@ int GPIO::sunxi_gpio_get_cfgpin(unsigned int pin) {
     cfg >>= offset;
     return (cfg & 0xf);
 }
-int GPIO::sunxi_gpio_output(unsigned int pin, unsigned int val) {
 
+int GPIO::sunxi_gpio_output(unsigned int pin, unsigned int val)
+{
     unsigned int bank = GPIO_BANK(pin);
     unsigned int num = GPIO_NUM(pin);
 
@@ -133,8 +130,8 @@ int GPIO::sunxi_gpio_output(unsigned int pin, unsigned int val) {
     return 0;
 }
 
-int GPIO::sunxi_gpio_input(unsigned int pin) {
-
+int GPIO::sunxi_gpio_input(unsigned int pin)
+{
     unsigned int dat;
     unsigned int bank = GPIO_BANK(pin);
     unsigned int num = GPIO_NUM(pin);
@@ -151,6 +148,7 @@ int GPIO::sunxi_gpio_input(unsigned int pin) {
 
     return (dat & 0x1);
 }
+
 void GPIO::sunxi_gpio_cleanup(void)
 {
     unsigned int PageSize;
